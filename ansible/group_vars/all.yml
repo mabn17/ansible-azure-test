@@ -1,0 +1,22 @@
+---
+# Here you can add variables that will be available for all hosts.
+region: norwayeast
+resource_group: BTH-kmom01-aar-e20886
+domain_name: martinborg.xyz
+
+vmtags:
+    StudentId: "moc"
+    Course: "kmom03"
+
+root_user: moc
+root_password: test123psw1
+
+server_user: deploy
+server_user_password: test123psw1
+server_user_groups:
+    - sudo
+
+pub_ssh_key_location:
+    - /home/mabn17/.ssh/id_rsa.pub
+
+monitoring_directory: /etc/prometheus

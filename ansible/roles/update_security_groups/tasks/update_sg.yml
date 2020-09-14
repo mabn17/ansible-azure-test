@@ -1,0 +1,7 @@
+---
+-   name: Update SG
+    azure_rm_securitygroup:
+        resource_group: "{{ resource_group }}"
+        name: "{{ item.name }}-sg"
+        rules: "{{ item.rules }}"
+        tags: "{{ vmtags }}"

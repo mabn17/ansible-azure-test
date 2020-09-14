@@ -1,0 +1,20 @@
+---
+serviceName: "prometheus"
+userId: "prometheus"
+groupId: "prometheus"
+exec_command: "/usr/bin/sudo /usr/local/bin/prometheus --config.file=/etc/prometheus/prometheus.conf --storage.tsdb.path=/data/prometheus --storage.tsdb.retention.time=2d"
+version: "2.10.0"
+
+database_ip: "{{ groups['database'][0] }}"
+database_port: 9104
+litsen_database: "{{ database_ip }}:{{ database_port }}"
+
+app_ip: "{{ groups['appserver'][0] }}"
+app_port: 9102
+litsen_app: "{{ app_ip }}:{{ app_port }}"
+
+load_ip: "{{ groups['loadbalancer'][0] }}"
+load_port: 9113
+litsen_load: "{{ load_ip }}:{{ load_port }}"
+
+monitoring_ip: "{{ groups['monitoring'][0] }}"

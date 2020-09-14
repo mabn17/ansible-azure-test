@@ -1,0 +1,69 @@
+http {
+    upstream app-hosts {
+        {{ lb_method }};
+        server {{ groups['appserver'][0] }}:5000;
+    }
+
+    proxy_cookie_path / "/; secure; HttpOnly; SameSite=strict";
+
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
+    # This server accepts all traffic to port 80 and passes it to the upstream. 
+    # Notice that the upstream name and the proxy_pass need to match.
+
+    server {
+       listen 80;
+       server_name  {{ domain_name }} www.{{ domain_name }};
+       return 301 https://$server_name$request_uri;
+
+       #location / {
+       #   proxy_pass http://app-hosts;
+       #}
+    }
+    server {
+       listen 443 ssl;
+       server_name  {{ domain_name }} www.{{ domain_name }};
+       add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+        
+       ssl_certificate /etc/letsencrypt/live/{{ domain_name }}/cert.pem;
+       ssl_certificate_key /etc/letsencrypt/live/{{ domain_name }}/privkey.pem;
+       ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+
+       location / {
+          proxy_pass http://app-hosts;
+       }
+
+       location /metrics {
+          stub_status on;
+       }
+
+       location /grafana {
+          #return 301 https://$host$request_uri;
+          # forward application requests to the gunicorn server
+          proxy_pass http://{{ groups['monitoring'][0] }}:3000;
+          proxy_redirect off;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       }
+
+       location /prometheus {
+          #return 301 https://$host$request_uri;
+          # forward application requests to the gunicorn server
+          proxy_pass http://{{ groups['monitoring'][0] }}:9090;
+          proxy_redirect off;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       }
+
+       add_header X-Frame-Options "SAMEORIGIN";
+       add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+       add_header "Pragma" "no-cache";
+       add_header "Cache-Control" "max-age=0, no-cache, no-store, must-revalidate";
+       add_header Content-Security-Policy "frame-ancestors 'self'";
+       add_header X-XSS-Protection "1; mode=block";
+       add_header X-Content-Type-Options nosniff;
+    }
+}

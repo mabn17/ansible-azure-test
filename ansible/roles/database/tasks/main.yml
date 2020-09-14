@@ -1,0 +1,40 @@
+---
+-   name: Copy sql file to host
+    copy:
+        src: files/dump.sql
+        dest: /home/{{ server_user }}/dump.sql
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: '0644'
+-   name: Copy docker-compose template file
+    template:
+        src: templates/docker-compose
+        dest: /home/{{ server_user }}/docker-compose.yml
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: '0644'
+
+-   name: Run docker-compose up to start MySql
+    docker_compose:
+        project_src: /home/{{ server_user }}/
+
+-   name: Prepare exporter user
+    shell: docker exec -i microblog-database mysql -uroot -ppass < /home/{{ server_user }}/dump.sql
+    ignore_errors: yes
+
+-   name: Pull prom/mysql-exporter
+    command: docker pull prom/mysqld-exporter
+
+-   name: Run prom container
+    command: docker run -d \
+            -p {{ monitor_host_port }}:{{ monitor_conteiner_port }} \
+            --network host \
+            -e DATA_SOURCE_NAME="exporter:pass@(localhost:{{ host_port }})/" \
+            --restart {{ policy }} \
+            prom/{{ monitor_image_name }} \
+            --collect.auto_increment.columns \
+            --collect.info_schema.processlist \
+            --collect.binlog_size \
+            --collect.engine_innodb_status \
+            --collect.engine_tokudb_status \
+            --collect.global_status

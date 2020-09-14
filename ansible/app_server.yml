@@ -1,0 +1,9 @@
+---
+-   hosts: appserver
+    remote_user: deploy
+    become: yes
+    become_method: sudo
+    vars:
+        ansible_python_interpreter: /usr/bin/python3
+    roles:
+        - app_server

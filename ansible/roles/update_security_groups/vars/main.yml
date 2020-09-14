@@ -1,0 +1,130 @@
+---
+sg_groups:
+    -   name: loadbalancer
+        rules:
+            -   name: SSH
+                protocol: Tcp
+                destination_port_range: 22
+                access: Allow
+                priority: 1001
+                direction: Inbound
+            -   name: HTTP
+                protocol: Tcp
+                destination_port_range: 80
+                access: Allow
+                priority: 1002
+                direction: Inbound
+            -   name: HTTPS
+                protocol: Tcp
+                destination_port_range: 443
+                access: Allow
+                priority: 1003
+                direction: Inbound
+            -   name: Monitoring
+                protocol: Tcp
+                source_address_prefix: "{{ groups['monitoring'][0] }}/32"
+                destination_port_range: 9113
+                access: Allow
+                priority: 1010
+                direction: Inbound
+    -   name: appserver
+        rules:
+            -   name: SSH
+                protocol: Tcp
+                destination_port_range: 22
+                access: Allow
+                priority: 1001
+                direction: Inbound
+            -   name: Loadbalancer
+                protocol: Tcp
+                source_address_prefix: "{{ groups['loadbalancer'][0] }}/32"
+                destination_port_range: 5000
+                access: Allow
+                priority: 1010
+                direction: Inbound
+            -   name: Monitoring1
+                protocol: Tcp
+                source_address_prefix: "{{ groups['monitoring'][0] }}/32"
+                destination_port_range: 9125
+                access: Allow
+                priority: 1011
+                direction: Inbound
+            -   name: Appserver
+                protocol: Tcp
+                source_address_prefix: "{{ groups['appserver'][0] }}/32"
+                destination_port_range: 9125
+                access: Allow
+                priority: 1012
+                direction: Inbound
+            -   name: Monitoring2
+                protocol: Tcp
+                source_address_prefix: "{{ groups['monitoring'][0] }}/32"
+                destination_port_range: 9102
+                access: Allow
+                priority: 1013
+                direction: Inbound
+    -   name: database
+        rules:
+            -   name: SSH
+                protocol: Tcp
+                destination_port_range: 22
+                access: Allow
+                priority: 1001
+                direction: Inbound
+            -   name: Appserver
+                protocol: Tcp
+                source_address_prefix: "{{ groups['appserver'][0] }}/32"
+                destination_port_range: 3306
+                access: Allow
+                priority: 1010
+                direction: Inbound
+            -   name: Monitoring
+                protocol: Tcp
+                source_address_prefix: "{{ groups['monitoring'][0] }}/32"
+                destination_port_range: 9104
+                access: Allow
+                priority: 1011
+                direction: Inbound
+    -   name: monitoring
+        rules:
+            -   name: SSH
+                protocol: Tcp
+                destination_port_range: 22
+                access: Allow
+                priority: 1001
+                direction: Inbound
+            -   name: Monitoring1
+                protocol: Tcp
+                source_address_prefix: "{{ groups['monitoring'][0] }}/32"
+                destination_port_range: 9100
+                access: Allow
+                priority: 1010
+                direction: Inbound
+            -   name: Monitoring2
+                protocol: Tcp
+                source_address_prefix: "{{ groups['monitoring'][0] }}/32"
+                destination_port_range: 9093
+                access: Allow
+                priority: 1011
+                direction: Inbound
+            -   name: Monitoring3
+                protocol: Tcp
+                source_address_prefix: "{{ groups['monitoring'][0] }}/32"
+                destination_port_range: 9090
+                access: Allow
+                priority: 1012
+                direction: Inbound
+            -   name: Loadbalancer1
+                protocol: Tcp
+                source_address_prefix: "{{ groups['loadbalancer'][0] }}/32"
+                destination_port_range: 3000
+                access: Allow
+                priority: 1013
+                direction: Inbound
+            -   name: Loadbalancer2
+                protocol: Tcp
+                source_address_prefix: "{{ groups['loadbalancer'][0] }}/32"
+                destination_port_range: 9090
+                access: Allow
+                priority: 1014
+                direction: Inbound

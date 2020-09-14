@@ -1,0 +1,33 @@
+---
+-   name: Install docker step 1
+    apt:
+        name: "{{ packages + pip_packages }}"
+
+-   name: Installing docker public key to apt
+    apt_key:
+        id: "{{ docker_key }}"
+        url: "{{ docker_url }}"
+
+-   name: Configure docker apt repo
+    apt_repository:
+        repo: "{{ docker_repo }}"
+        update_cache: true
+
+-   name: Install pip
+    apt:
+        name: python3-pip
+
+-   name: Install docker step 2
+    pip:
+        name: "docker"
+        executable: pip3
+    
+-   name: Install docker-compose
+    pip:
+        name: "docker-compose"
+        executable: pip3
+
+-   name: Install docker step 3
+    apt:
+        name: "docker-ce"
+        state: "present"

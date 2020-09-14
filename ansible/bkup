@@ -1,0 +1,11 @@
+[defaults]
+host_key_checking           = False
+private_key_file            = ~/.ssh/first.pem
+ansible_python_interpreter  = python3
+inventory                   = hosts
+
+[inventory]
+enable_plugins              = ini
+
+[ssh_connection]
+ssh_args                    =

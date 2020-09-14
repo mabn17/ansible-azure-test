@@ -1,0 +1,58 @@
+---
+-   name: Update apt-cache and upgrade
+    apt:
+        force_apt_get: yes
+        update_cache: "True"
+        cache_valid_time: 3600
+        upgrade: yes
+    
+-   name: Install packages
+    apt:
+        force_apt_get: yes
+        name: "{{ packages }}"
+    
+-   name: ansible create directory example
+    file:
+        path: "/var/lib/grafana/"
+        state: directory
+
+-   name: Download graphana
+    get_url:
+        url: "https://dl.grafana.com/oss/release/grafana_{{ version }}_amd64.deb"
+        dest: "/etc/prometheus"
+        mode: '0440'
+    
+-   name: Downloading dashboards
+    git:
+        repo: "https://github.com/percona/grafana-dashboards.git"
+        dest: "/home/{{ server_user }}/grafana-dashboards"
+    
+-   name: Copy file to correct path
+    copy:
+        src: "/home/{{ server_user }}/grafana-dashboards"
+        dest: /var/lib/grafana/
+        remote_src: yes
+    
+-   name: Install grafana
+    command: sudo dpkg -i /etc/prometheus/grafana_{{ version }}_amd64.deb
+    
+-   name: "Grafana configuration file copy"
+    template:
+        src: "grafana.conf.j2"
+        dest: /etc/grafana/grafana.ini
+    notify: event_restart_grafana
+
+-   name: "Grafana server started"
+    service:
+        name: grafana-server
+        enabled: true
+        state: started
+
+-   meta: flush_handlers
+
+-   name: "Check if Grafana is accessible."
+    uri:
+        url: http://127.0.0.1:3000
+        method: GET
+        status_code: 200
+    ignore_errors: yes

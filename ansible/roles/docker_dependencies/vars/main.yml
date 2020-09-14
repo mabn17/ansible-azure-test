@@ -1,0 +1,18 @@
+packages:
+    - "apt-transport-https"
+    - "ca-certificates"
+    - "cron"
+    - "gnupg2"
+    - "software-properties-common"
+
+pip_packages:
+    - "python-setuptools"
+    - "python{{ '3' if ansible_python.version.major == 3 else '' }}-pip"
+
+docker_channel: ["stable"]
+docker_key: "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
+docker_url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+docker_repo: >
+    deb [arch=amd64]
+    https://download.docker.com/linux/{{ ansible_distribution | lower }}
+    {{ ansible_distribution_release }} {{ docker_channel | join (' ') }}

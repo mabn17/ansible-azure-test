@@ -1,0 +1,46 @@
+# Terminate VM instances
+---
+- name: Remove a VM and all resources that were autocreated
+  azure_rm_virtualmachine:
+      resource_group: myResourceGroup
+      name: testvm002
+      remove_on_absent: all_autocreated
+      state: absent
+
+    # -   hosts: local
+    #     connection: local
+    #     gather_facts: False
+    #     vars_files:
+    #         - azure_keys.yml
+    #     roles:
+    #         - gather_azure_instances
+    #     tasks:
+    #         -   name: disassociate an elastic IP with a device
+    #             ec2_eip:
+    #                 # device_id: "{{ item.item.instance_id }}"
+    #                 ip: "{{ item.public_ip_address }}"
+    #                 state: absent
+    #                 region: "{{  region  }}"
+    #                 aws_access_key: "{{ aws_access_key }}"
+    #                 aws_secret_key: "{{ aws_secret_key }}"
+    #                 security_token: "{{ aws_session_token }}"
+    #             with_items:
+    #                 "{{ ec2_facts.instances }}"
+    #             when: item.tags.name is defined and item.tags.name == "loadBalancer" and item.state.name is defined and item.state.name == "running"
+    
+    
+    #         -   name: Terminate EC2 Instance(s)
+    #             ec2:
+    #                 instance_ids: '{{ item.instance_id }}'
+    #                 state: absent
+    #                 region: "{{ region }}"
+    #                 aws_access_key: "{{ aws_access_key }}"
+    #                 aws_secret_key: "{{ aws_secret_key }}"
+    #                 security_token: "{{ aws_session_token }}"
+    #             with_items:
+    #                 "{{ ec2_facts.instances }}"
+    #             when: item.tags.project is defined and item.tags.project == "devops"
+    #             register: terminated_instances
+    
+    #         -   name: Refresh hosts/inventory to remove old EC2 isntance
+    #             meta: refresh_inventory

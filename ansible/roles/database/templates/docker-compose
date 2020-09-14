@@ -1,0 +1,16 @@
+version: "3"
+services: 
+    mysql:
+        image: {{ image_name }}
+        container_name: {{ container_name }}
+        environment:
+            - MYSQL_DATABASE={{ MYSQL_DATABASE }}
+            - MYSQL_USER={{ MYSQL_USER }}
+            - MYSQL_PASSWORD={{ MYSQL_PASSWORD }}
+            - MYSQL_ROOT_PASSWORD={{ MYSQL_ROOT_PASSWORD }}
+        restart:
+            {{ policy }}
+        ports:
+          - {{ host_port }}:{{ conteiner_port }}
+        volumes:
+          - {{ host_volume }}:{{ container_volume }}

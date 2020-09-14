@@ -1,0 +1,7 @@
+---
+-   import_playbook: terminate.yml
+-   import_playbook: provision.yml
+-   import_playbook: gather_az_instances.yml
+-   import_playbook: database.yml
+-   import_playbook: app_server.yml
+-   import_playbook: load_balancer.yml

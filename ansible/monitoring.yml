@@ -1,0 +1,9 @@
+---
+-   hosts: monitoring
+    remote_user: deploy
+    become: yes
+    become_method: sudo
+    roles:
+        - prometheus
+        - prometheus_node_exporter
+        - grafana

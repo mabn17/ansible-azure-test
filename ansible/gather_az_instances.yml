@@ -1,0 +1,7 @@
+# Gather facts from remote VM's
+---
+-   hosts: localhost
+    connection: local
+    gather_facts: False
+    roles:
+        -    gather_az_instances

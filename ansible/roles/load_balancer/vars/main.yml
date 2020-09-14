@@ -1,0 +1,8 @@
+---
+lb_method: "ip_hash"
+email: "martin.d@live.se"
+
+monitor_host_port: 9113
+monitor_conteiner_port: 9113
+nginx_prom_version: 0.4.2
+prom_proxy_path: metrics

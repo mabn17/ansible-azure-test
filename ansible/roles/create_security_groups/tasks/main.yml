@@ -1,0 +1,7 @@
+---
+-   include_tasks: create_groups.yml
+    with_items:
+        - name: loadbalancer
+        - name: appserver
+        - name: database
+        - name: monitoring

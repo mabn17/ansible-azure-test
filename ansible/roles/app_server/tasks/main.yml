@@ -1,0 +1,29 @@
+---
+-   name: Move conf file
+    copy:
+        src: files/statsd.conf.j2
+        dest: /home/{{ server_user }}/statsd.conf
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: '0644'
+
+-   name: Pull prom/statsd-exporter
+    command: docker pull prom/statsd-exporter
+
+-   name: Run prom container
+    command: docker run -dP --net=host \
+            --restart=always \
+            -p 9102:9102 -p 9125:9125 -p 9125:9125/udp \
+            -v /home/{{ server_user }}/statsd.conf:/statsd/statsd.conf \
+            prom/statsd-exporter "--statsd.mapping-config=/statsd/statsd.conf"
+
+-   name: "Launch docker container with microblog application"
+    docker_container:
+        name: "{{ container_name }}"
+        image: "{{ image_name }}"
+        ports:
+          - "{{ host_port }}:{{ container_port }}"
+        restart_policy: "{{ policy }}"
+        network_mode: "{{ docker_network }}"
+        env:
+          DATABASE_URL: "{{ database_url }}"

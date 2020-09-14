@@ -1,0 +1,8 @@
+---
+-   hosts: appserver,database,loadbalancer,monitoring
+    remote_user: moc
+    become: yes
+    become_method: sudo
+    roles:
+        #- docker_dependencies
+        - 10_first_minutes

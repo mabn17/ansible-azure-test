@@ -1,0 +1,10 @@
+# Provision servers on Azure
+---
+-   hosts: localhost
+    connection: localhost # Keep ansible from open ssh connection
+    gather_facts: False
+    roles:
+        #-   create_security_groups
+        #-   provision
+        #-   gather_az_instances
+        #-   update_security_groups
