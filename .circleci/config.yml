@@ -70,7 +70,7 @@ jobs:
           command: make install-deploy
       - run:
           name: Decrypt files and push to app_server
-          command: cd ansible && ansible-playbook gather_az_instances.yml update_image.yml
+          command: cd ansible && ansible-playbook gather_instances.yml update_instances.yml
 
 workflows:
   version: 2
