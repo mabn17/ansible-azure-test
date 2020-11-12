@@ -6,7 +6,7 @@ executors:
       FLASK_APP: microblog.py
       IMAGE_NAME: mabn17/devops-v2-azure-test_prod
       CI_IMAGE_NAME: project_prod
-      IMG_SHORT: prod
+      COMPOSE_COMMAND: prod
     docker:
       - image: circleci/buildpack-deps:stretch
 jobs:
@@ -28,7 +28,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: Build Docker image
-          command: docker-compose up --build -d $IMG_SHORT
+          command: docker-compose up --build -d $COMPOSE_COMMAND
       - run:
           name: Rename Docker image
           command: docker tag $CI_IMAGE_NAME:latest $IMAGE_NAME:latest
