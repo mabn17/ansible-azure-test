@@ -1,0 +1,108 @@
+version: 2.1
+executors:
+  docker-publisher:
+    environment:
+      FLASK_ENV: production
+      FLASK_APP: microblog.py
+      IMAGE_NAME: mabn17/devops-v2-azure-test_prod
+      CI_IMAGE_NAME: project_prod
+      IMG_SHORT: prod
+    docker:
+      - image: circleci/buildpack-deps:stretch
+jobs:
+  test:
+    machine: true
+    working_directory: ~/repo
+    environment:
+      FLASK_ENV: test
+      FLASK_APP: microblog.py
+    steps:
+      - checkout
+      - run:
+          name: Run linting and tests
+          command: make test
+  build:
+    executor: docker-publisher
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: docker-compose up --build -d $IMG_SHORT
+      - run:
+          name: Rename Docker image
+          command: docker tag $CI_IMAGE_NAME:latest $IMAGE_NAME:latest
+      - run:
+          name: Archive Docker image
+          command: docker save -o image.tar $IMAGE_NAME
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./image.tar
+  publish-latest:
+    executor: docker-publisher
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - setup_remote_docker
+      - run:
+          name: Load archived Docker image
+          command: docker load -i /tmp/workspace/image.tar
+      - run:
+          name: Publish Docker Image to Docker Hub
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker push $IMAGE_NAME
+  update-app-server:
+    executor: docker-publisher
+    working_directory: ~/project
+    steps:
+      - checkout
+      - run:
+          name: Install venv
+          command: sudo apt-get install libpcap-dev libpq-dev python3-venv
+      - run:
+          name: Create venv
+          command: python3 -m venv venv
+      - run: echo "source ~/project/venv/bin/activate" >> $BASH_ENV
+      - run:
+          name: Install requirements to deploy app
+          command: make install-deploy
+      - run:
+          name: Decrypt files and push to app_server
+          command: cd ansible && ansible-playbook gather_az_instances.yml update_image.yml
+
+workflows:
+  version: 2
+  build-master:
+    jobs:
+      - test:
+          filters:
+            tags:
+              only: /^v[0-9]++.[0-9]++.[0-9]++$/
+            branches:
+              ignore: /.*/
+      - build:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /^v[0-9]++.[0-9]++.[0-9]++$/
+            branches:
+              ignore: /.*/
+      - publish-latest:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v[0-9]++.[0-9]++.[0-9]++$/
+            branches:
+              ignore: /.*/
+      - update-app-server:
+          requires:
+            - publish-latest
+          filters:
+            tags:
+              only: /^v[0-9]++.[0-9]++.[0-9]++$/
+            branches:
+              ignore: /.*/

@@ -2,8 +2,6 @@
 -   name: Get facts by tags
     azure_rm_virtualmachine_info:
         resource_group: "{{ resource_group }}"
-        tags:
-            - StudentId:moc
     delegate_to: localhost
     register: az_facts
 
@@ -11,14 +9,14 @@
     debug:
         var: az_facts
 
--   name: add instance to hosts
-    add_host:
-        name: "{{ item.tags.PublicIP }}"
-        groups: "{{ item.name[0:-3] }}"
-    with_items: "{{ az_facts.vms }}"
-    when: item.tags.PublicIP is defined and item.power_state == "running"
-    #when: item.tags.PublicIP is defined
+# -   name: add instance to hosts
+#     add_host:
+#         name: "{{ item.tags.PublicIP }}"
+#         groups: "{{ item.name[0:-3] }}"
+#     with_items: "{{ az_facts.vms }}"
+#     when: item.tags.PublicIP is defined and item.power_state == "running"
+#     #when: item.tags.PublicIP is defined
 
--   name: Display all variables/facts known for a host
-    debug:
-        var: hostvars
+# -   name: Display all variables/facts known for a host
+#     debug:
+#         var: hostvars

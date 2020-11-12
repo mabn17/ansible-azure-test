@@ -1,3 +1,5 @@
--r requirements/prod.txt
-gunicorn==19.7.1
-pymysql >= 0.9.3
+boto >= 2.49.0
+boto3 >= 1.9.203
+ansible <= 2.9.12
+PyMySQL >= 0.9.3
+ansible[azure]
