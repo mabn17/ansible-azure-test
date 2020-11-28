@@ -28,6 +28,9 @@
 
 #################################### Server ####################################
 [server]
+domain = {{ domain_name }}
+root_url = %(protocol)s://%(domain)s/grafana/
+
 # Protocol (http, https, socket)
 ;protocol = http
 
