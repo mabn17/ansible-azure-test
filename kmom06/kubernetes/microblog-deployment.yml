@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: microblog
+  labels:
+    app: microblog
+spec:
+  selector:
+    app: microblog
+  ports:
+    - port: 5000
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microblog
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: microblog
+  template:
+    metadata:
+      labels:
+        app: microblog
+    spec:
+      containers:
+      - name: microblog
+        image: mabn17/microblog-1-kubernetes:latest
+        ports:
+          - containerPort: 5000
+        env:
+          - name: SECRET_KEY
+            value: kubernetes
+          - name: DATABASE_URL
+            value: mysql+pymysql://microblog:pass@mysql:3306/microblog
+        livenessProbe:
+            httpGet:
+                path: /
+                port: 5000

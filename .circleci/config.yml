@@ -6,7 +6,7 @@ executors:
       FLASK_APP: microblog.py
       IMAGE_NAME: mabn17/devops-v2-azure-test_prod
       CI_IMAGE_NAME: project_prod
-      IMG_SHORT: prod
+      COMPOSE_COMMAND: prod
     docker:
       - image: circleci/buildpack-deps:stretch
 jobs:
@@ -19,7 +19,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Run linting and tests
+          name: Linting dockerfiles, code and runs the tests.
           command: make test
   build:
     executor: docker-publisher
@@ -27,13 +27,13 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Build Docker image
-          command: docker-compose up --build -d $IMG_SHORT
+          name: Building the production image for Docker.
+          command: docker-compose up --build -d $COMPOSE_COMMAND
       - run:
-          name: Rename Docker image
+          name: Renaming or tagging the Docker image.
           command: docker tag $CI_IMAGE_NAME:latest $IMAGE_NAME:latest
       - run:
-          name: Archive Docker image
+          name: Archiving the Docker image for later jobs.
           command: docker save -o image.tar $IMAGE_NAME
       - persist_to_workspace:
           root: .
@@ -46,10 +46,10 @@ jobs:
           at: /tmp/workspace
       - setup_remote_docker
       - run:
-          name: Load archived Docker image
+          name: Loading the archived image.
           command: docker load -i /tmp/workspace/image.tar
       - run:
-          name: Publish Docker Image to Docker Hub
+          name: Publish the Docker image to Docker-hub.
           command: |
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
             docker push $IMAGE_NAME
@@ -59,29 +59,27 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install venv
+          name: Installing venv.
           command: sudo apt-get install libpcap-dev libpq-dev python3-venv
       - run:
-          name: Create venv
+          name: Source the activate file.
           command: python3 -m venv venv
       - run: echo "source ~/project/venv/bin/activate" >> $BASH_ENV
       - run:
-          name: Install requirements to deploy app
+          name: Installing requirements to deploy the application.
           command: make install-deploy
       - run:
-          name: Decrypt files and push to app_server
-          command: cd ansible && ansible-playbook gather_instances.yml update_instances.yml
+          name: Preparing the password decryption -file.
+          command: echo "$VALUT_PASS" > ~/project/ansible/.vault_password.txt
+      - run:
+          name: Decrypt ansible variables and updates the AppServer.
+          command: cd ansible && ansible-playbook gather_instances.yml update_instances.yml --vault-password-file .vault_password.txt
 
 workflows:
   version: 2
   build-master:
     jobs:
-      - test:
-          filters:
-            tags:
-              only: /^v[0-9]++.[0-9]++.[0-9]++$/
-            branches:
-              ignore: /.*/
+      - test
       - build:
           requires:
             - test
